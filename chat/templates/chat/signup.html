@@ -1,0 +1,45 @@
+{% extends 'chat/base.html' %}
+{% block title %}SignUp{% endblock %}
+
+{% block body %}
+{% if errors %}
+<div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{errors}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+{% endif %}
+<div class="row container-fluid my-3">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <h2 class="text-center">Signup</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type="submit" class="btn btn-outline-warning mb-3 form-control">Signup</button>
+        </form>
+    </div>
+</div>
+<script>
+    var username = document.getElementById('id_username');
+    var email = document.getElementById('id_email');
+    var password1 = document.getElementById('id_password1');
+    var password2 = document.getElementById('id_password2');
+    var first_name = document.getElementById('id_first_name');
+    var last_name = document.getElementById('id_last_name');
+    username.classList.add('form-control');
+    email.classList.add('form-control');
+    password1.classList.add('form-control');
+    password2.classList.add('form-control');
+    first_name.classList.add('form-control');
+    last_name.classList.add('form-control');
+    username.placeholder = 'Username';
+    email.placeholder = 'Email';
+    password1.placeholder = 'Password';
+    password2.placeholder = 'Confirm Password';
+    first_name.placeholder = 'First Name';
+    last_name.placeholder = 'Last Name';
+
+</script>
+{% endblock %}

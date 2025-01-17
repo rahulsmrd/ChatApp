@@ -1,48 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
-</head>
-<body>
-    {{users}} <br>
-    {{user_object}} <br>
-    {{messages}}
-    <input type="text" id="messageInput" placeholder="Type your message here">
-    <button id="sendMessage">Send</button>
-    <div id="id_chat_item_container"></div>
+{% extends 'chat/base.html' %}
+{% load static %}
 
-    <script>
-        console.log("ws://" + window.location.host + "/chat/{{user_object.id}}/");
-        // http://127.0.0.1:8000/chat/chat/dhanush/
-        
-        const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/{{user_object.id}}/");
-        chatSocket.onopen = function (e) {
-          console.log("The connection was setup successfully !");
-        };
-        chatSocket.onclose = function (e) {
-          console.log("Something unexpected happened !");
-        };
-        document.querySelector("#messageInput").focus();
-        document.querySelector("#messageInput").onkeyup = function (e) {
-          if (e.keyCode == 13) {
-            document.querySelector("#sendMessage").click();
-          }
-        };
-        document.querySelector("#sendMessage").onclick = function (e) {
-          var messageInput = document.querySelector(
-            "#messageInput"
-          ).value;
-          chatSocket.send(JSON.stringify({ message: messageInput, username : "{{request.user.username}}"}));
-        };
-        chatSocket.onmessage = function (e) {
-          const data = JSON.parse(e.data);
-          var div = document.createElement("div");
-          div.innerHTML = data.username + " : " + data.message;
-          document.querySelector("#messageInput").value = "";
-          document.querySelector("#id_chat_item_container").appendChild(div);
-        };
-      </script>
-</body>
-</html>
+{% block title %}Chat{% endblock %}
+{% block body %}
+<p>After starting a new conversation please refresh to experience the design</p>
+  <div class="container my-3">
+
+    <div class="card">
+      <div class="card-body">
+
+        <div class="row">
+
+          <div class="col-md-4">
+            <h2>Chat with ...</h2>
+            <div class="users">
+              {% for other_user in users_list %}
+              <div class="card my-3" onclick="openChat('{{other_user.id}}', '{{user.id}}')">
+                <div class="card-body">
+                  <h5 class="card-title">{{ other_user.username }}</h5>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+
+          <div class="col-md-8" id="chatPanel">
+            {% for group, messages in groups.items %}
+            <div id="chat-{{group}}" class="chat">
+              {% for message in messages %}
+              {% if forloop.counter0 == 0 %}
+              <div class="userinfo">
+                {% if message.sender != user %}
+                <h3>Chating with {{message.sender}}</h3>
+                {% else %}
+                <h3>Chating With {{message.receiver}}</h3>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% if message.sender == user %}
+              <p class="toUser">{{message.content}}</p>
+              <span class="toUserTime">{{message.timestamp | time:'g:i A'}}</span>
+              {% else %}
+              <p class="fromUser">{{message.content}}</p>
+              <span class="fromUserTime">{{message.timestamp | time:'g:i A'}}</span>
+              {% endif %}
+              {% endfor %}
+              <div id="chat_container_{{group}}"></div>
+              <input type="text" id="messageInput_{{group}}" placeholder="Type your message here">
+              <button id="sendMessage" type="button" class="btn btn-success fs-4"><i
+                  class="bi bi-send-fill"></i></button>
+            </div>
+            {% endfor %}
+
+            <div class="newChat">
+              <div></div>
+              <input type="text" placeholder="Type your message here">
+              <button id="sendMessage" type="button" class="btn btn-success fs-4"><i
+                  class="bi bi-send-fill"></i></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+{% endblock %}

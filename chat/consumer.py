@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
@@ -7,7 +8,9 @@ from chat.models import Message
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
-        self.room_name = self.scope['url_route']['kwargs']['id']
+        loginUser = self.scope['user']
+        user_list = [int(self.scope['url_route']['kwargs']['id']), int(loginUser.id)]
+        self.room_name = f"{max(user_list)}-{min(user_list)}"
         self.room_group_name = 'chat_%s' % self.room_name
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -39,16 +42,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': saved_message
+                'message': saved_message,
             }
         )
 
     async def chat_message(self , event) : 
         print(event)
         message = event["message"]
-        sender = str(message.sender)
-        receiver = str(message.receiver)
-        data = {"message":message.content, "sender": sender, "receiver": receiver}
+        sender = str(message.sender.id)
+        receiver = str(message.receiver.id)
+        time = message.timestamp.strftime("%I:%M %p")
+        data = {"message":message.content, "sender": sender, "receiver": receiver, "time":time}
         await self.send(text_data = json.dumps(data))
 
     @database_sync_to_async
