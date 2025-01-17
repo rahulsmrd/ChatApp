@@ -40,3 +40,6 @@ def signup_view(request):
         form = SignupForm()
     
     return render(request, 'chat/signup.html', {'form': form})
+
+def home(request):
+    return render(request, 'chat/home.html')
